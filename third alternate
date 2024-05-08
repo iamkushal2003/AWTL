@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Manager</title>
+<style>
+    .board {
+        width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px;
+        background-color: #f9f9f9;
+    }
+    .task {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 5px;
+        cursor: pointer;
+    }
+    .add-task {
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+
+<div id="toDoBoard" class="board" ondrop="drop(event, 'toDo')" ondragover="allowDrop(event)">
+    <h2>To Do</h2>
+</div>
+
+<div id="inProgressBoard" class="board" ondrop="drop(event, 'inProgress')" ondragover="allowDrop(event)">
+    <h2>In Progress</h2>
+</div>
+
+<div id="doneBoard" class="board" ondrop="drop(event, 'done')" ondragover="allowDrop(event)">
+    <h2>Done</h2>
+</div>
+
+<div class="add-task">
+    <input type="text" id="taskInput" placeholder="Enter task...">
+    <button onclick="addTask()">Add Task</button>
+</div>
+
+<script>
+    // Initialize tasks
+    let tasks = {
+        toDo: [],
+        inProgress: [],
+        done: []
+    };
+
+    // Retrieve tasks from local storage if available
+    if (localStorage.getItem('tasks')) {
+        tasks = JSON.parse(localStorage.getItem('tasks'));
+        renderTasks();
+    }
+
+    // Function to render tasks
+    function renderTasks() {
+        for (let board in tasks) {
+            let boardElement = document.getElementById(board + 'Board');
+            boardElement.innerHTML = <h2>${capitalizeFirstLetter(board)}</h2>;
+            tasks[board].forEach((task, index) => {
+                let taskElement = document.createElement('div');
+                taskElement.classList.add('task');
+                taskElement.draggable = true;
+                taskElement.setAttribute('ondragstart', 'drag(event)');
+                taskElement.textContent = task;
+                if (board === 'done') {
+                    let deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.onclick = function() {
+                        deleteTask('done', index);
+                    };
+                    taskElement.appendChild(deleteButton);
+                }
+                boardElement.appendChild(taskElement);
+            });
+        }
+    }
+
+    // Function to add task
+    function addTask() {
+        let taskInput = document.getElementById('taskInput');
+        let task = taskInput.value.trim();
+        if (task !== '') {
+            tasks.toDo.push(task);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+            taskInput.value = '';
+        }
+    }
+
+    // Function to delete task
+    function deleteTask(board, index) {
+        tasks[board].splice(index, 1);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        renderTasks();
+    }
+
+    // Function to allow drop
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    // Function to drag
+    function drag(event) {
+        event.dataTransfer.setData("text", event.target.textContent);
+    }
+
+    // Function to drop
+    function drop(event, targetBoard) {
+        event.preventDefault();
+        let data = event.dataTransfer.getData("text");
+        if (targetBoard !== 'done') {
+            tasks[targetBoard].push(data);
+            // Remove task from the previous board
+            for (let board in tasks) {
+                if (board !== targetBoard) {
+                    let index = tasks[board].indexOf(data);
+                    if (index !== -1) {
+                        tasks[board].splice(index, 1);
+                    }
+                }
+            }
+        } else {
+            tasks.done.push(data);
+            // Remove task from the previous board
+            for (let board in tasks) {
+                if (board !== 'done') {
+                    let index = tasks[board].indexOf(data);
+                    if (index !== -1) {
+                        tasks[board].splice(index, 1);
+                    }
+                }
+            }
+        }
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        renderTasks();
+    }
+
+    // Function to capitalize first letter
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+</script>
+
+</body>
+</html>
