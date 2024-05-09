@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vehicle Information</title>
+<style>
+body {
+font-family: Arial, sans-serif; margin: 0;
+padding: 20px;
+}
+
+
+h2 {
+
+}
+
+
+color: #333;
+
+
+label {
+font-weight: bold;
+}
+
+input[type="text"] { width: 200px;
+padding: 5px;
+margin-bottom: 10px;
+}
+
+input[type="submit"] { padding: 8px 15px;
+background-color: #4CAF50; border: none;
+color: white;
+cursor: pointer;
+}
+</style>
+</head>
+<body>
+<h2>Enter Car Information</h2>
+<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+<label for="brand">Brand:</label>
+<input type="text" id="brand" name="brand" required><br><br>
+
+<label for="model">Model:</label>
+<input type="text" id="model" name="model" required><br><br>
+
+<label for="color">Color:</label>
+<input type="text" id="color" name="color" required><br><br>
+
+<input type="submit" value="Submit">
+</form>
+
+<?php
+class Vehicle {
+protected $brand; protected $model;
+
+public function construct($brand, $model) {
+$this->brand = $brand;
+$this->model = $model;
+}
+
+public function displayInfo() {
+return "Brand: {$this->brand}, Model: {$this->model}";
+}
+
+public function   destruct() { echo "Object destroyed.";
+}
+}
+
+class Car extends Vehicle { private $color;
+
+public function   construct($brand, $model, $color) { parent:: construct($brand, $model);
+$this->color = $color;
+}
+
+public function displayInfo() {
+return parent::displayInfo() . ", Color: {$this->color}";
+}
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$brand = $_POST['brand'];
+$model = $_POST['model'];
+$color = $_POST['color'];
+
+$car = new Car($brand, $model, $color);
+
+echo "<h2>Car Information</h2>"; echo $car->displayInfo();
+}
+?>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+</body>
+</html>
